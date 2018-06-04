@@ -18,6 +18,7 @@ link_directories(${CMAKE_ARCHIVE_OUTPUT_DIRECTORY})
 add_executable(brtools-tests
     tests/stream_parser_test.cpp
     tests/section_parser_test.cpp
+    tests/file_parser_test.cpp
 )
 
 add_dependencies(brtools-tests googletest)
