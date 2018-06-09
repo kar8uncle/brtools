@@ -18,6 +18,7 @@ add_library(brtools STATIC
     source/io/detail/stream_parser.cpp 
     source/io/detail/section_parser.cpp 
     source/io/detail/file_parser.cpp
+    source/trie/stringtrie.cpp
 )
 
 set_target_properties(brtools PROPERTIES
