@@ -1,9 +1,8 @@
 #include "file_parser.h"
-#include "integrity_error.h"
 #include <cinttypes>    // for uint32_t
 #include <algorithm>    // for generate
 
-using namespace brtools::io::detail;
+using namespace brtools::io;
 using namespace std;
 
 file_parser::file_parser(stream_parser& sp, const string::size_type magic_length)

@@ -1,14 +1,14 @@
 #include <gtest/gtest.h>
-#include <io/detail/section_parser.h>
-#include <io/detail/stream_parser.h>
-#include <io/detail/integrity_error.h>
+#include <io/section_parser.h>
+#include <io/stream_parser.h>
+#include <error/integrity_error.h>
 
 #include <sstream>  // for istringstream
 #include <cstdint>  // for uint8_t, uint16_t
 
 using namespace ::testing;
 using namespace std;
-using namespace brtools::io::detail;
+using namespace brtools::io;
 
 namespace
 {
@@ -61,6 +61,8 @@ TEST(section_parser, well_formed_section)
 
     EXPECT_EQ(0xDEAD, sp.read<uint16_t>());
 }
+
+using brtools::error::integrity_error;
 
 /**
  * Tests that an integrity_error is thrown if section size specified in section is

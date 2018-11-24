@@ -1,5 +1,5 @@
-#ifndef BRTOOLS_IO_DETAIL_STREAM_PARSER_H
-#define BRTOOLS_IO_DETAIL_STREAM_PARSER_H
+#ifndef BRTOOLS_IO_STREAM_PARSER_H
+#define BRTOOLS_IO_STREAM_PARSER_H
 #pragma once
 
 #include <istream>
@@ -11,8 +11,6 @@
 namespace brtools
 {
 namespace io
-{
-namespace detail
 {
     class stream_parser
     {
@@ -132,7 +130,6 @@ namespace detail
         value = *reinterpret_cast<const Tp*>(parser.read(sizeof(value)).get());
         return parser;
     }
-}
 }
 }
 #endif

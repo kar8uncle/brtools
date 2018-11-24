@@ -1,5 +1,5 @@
-#ifndef BRTOOLS_IO_DETAIL_SECTION_PARSER_H
-#define BRTOOLS_IO_DETAIL_SECTION_PARSER_H
+#ifndef BRTOOLS_IO_SECTION_PARSER_H
+#define BRTOOLS_IO_SECTION_PARSER_H
 #pragma once
 
 #include "stream_parser.h"
@@ -9,8 +9,6 @@
 namespace brtools
 {
 namespace io
-{
-namespace detail
 {
     class stream_parser;
 
@@ -67,7 +65,6 @@ namespace detail
          */
         std::streampos _m_seek_to_on_destruct;
     };
-}
 }
 }
 

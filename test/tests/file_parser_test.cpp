@@ -1,12 +1,12 @@
 #include <gtest/gtest.h>
-#include <io/detail/stream_parser.h>
-#include <io/detail/file_parser.h>
+#include <io/stream_parser.h>
+#include <io/file_parser.h>
 
 #include <sstream>  // for istringstream
 
 using namespace ::testing;
 using namespace std;
-using namespace brtools::io::detail;
+using namespace brtools::io;
 
 /**
  * Tests that a well-formed big endian file is read correctly.

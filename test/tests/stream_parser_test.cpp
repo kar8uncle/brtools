@@ -1,5 +1,5 @@
 #include <gtest/gtest.h>
-#include <io/detail/stream_parser.h>
+#include <io/stream_parser.h>
 
 #include <sstream>      // istringstream
 #include <cstdint>      // uint8_t, uint16_t, uint32_t
@@ -8,7 +8,7 @@
 
 using namespace ::testing;
 using namespace std;
-using namespace brtools::io::detail;
+using namespace brtools::io;
 
 namespace
 {

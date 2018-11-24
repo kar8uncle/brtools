@@ -2,7 +2,7 @@
 #include <stdexcept>        // for invalid_argument, logic_error
 #include <algorithm>        // for reverse
 
-using namespace brtools::io::detail;
+using namespace brtools::io;
 using namespace std;
 
 stream_parser::stream_parser(istream& file_in)

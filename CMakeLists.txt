@@ -15,9 +15,11 @@ add_subdirectory(
 )
 
 add_library(brtools STATIC
-    source/io/detail/stream_parser.cpp 
-    source/io/detail/section_parser.cpp 
-    source/io/detail/file_parser.cpp
+    source/error/errors.cpp
+    source/error/integrity_error.cpp
+    source/io/stream_parser.cpp 
+    source/io/section_parser.cpp 
+    source/io/file_parser.cpp
     source/trie/stringtrie.cpp
 )
 

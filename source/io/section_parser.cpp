@@ -1,9 +1,10 @@
 #include "section_parser.h"
-#include "integrity_error.h"
+#include <error/integrity_error.h>
 #include <cinttypes>    // for uint32_t
 #include <algorithm>    // for generate
 
-using namespace brtools::io::detail;
+using namespace brtools::io;
+using namespace brtools::error;
 using namespace std;
 
 namespace
@@ -11,6 +12,7 @@ namespace
     void check_section_length(stream_parser& fp, const uint32_t expected_length)
     {
         const auto section_length_in_section = fp.read<uint32_t>();
+        if (!integrity_error::suppressed)
         if (expected_length != section_length_in_section)
         {
             throw integrity_error(

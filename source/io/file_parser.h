@@ -1,5 +1,5 @@
-#ifndef BRTOOLS_IO_DETAIL_FILE_PARSER_H
-#define BRTOOLS_IO_DETAIL_FILE_PARSER_H
+#ifndef BRTOOLS_IO_FILE_PARSER_H
+#define BRTOOLS_IO_FILE_PARSER_H
 #pragma once
 
 #include "stream_parser.h"
@@ -10,8 +10,6 @@
 namespace brtools
 {
 namespace io
-{
-namespace detail
 {
     class stream_parser;
 
@@ -101,7 +99,6 @@ namespace detail
          */
         file_size_type    _m_size;
     };
-}
 }
 }
 
