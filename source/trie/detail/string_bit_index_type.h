@@ -88,8 +88,8 @@ namespace detail
         static constexpr size_t bit_index_type_size  = 3;
 
         /**
-         * The remaining bits available in _UnderlyingType to address
-         * characters in a string.
+         * The remaining bits available in _IndexType to address characters
+         * in a string.
          */
         static constexpr size_t char_index_type_size = std::numeric_limits<index_type>::digits - bit_index_type_size;
         
