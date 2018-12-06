@@ -32,6 +32,6 @@ target_compile_features(brtools PRIVATE
 )
 
 target_include_directories(brtools
-    PRIVATE .
+    PRIVATE ${PROJECT_SOURCE_DIR}/source
     PUBLIC  ${PROJECT_SOURCE_DIR}/header
 )

@@ -54,7 +54,7 @@ namespace io
         template<typename Tp>
         Tp read()
         {
-            Tp v; *this >> v; return v;
+            Tp v{}; *this >> v; return v;
         }
 
     public: // position related
