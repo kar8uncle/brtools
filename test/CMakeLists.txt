@@ -22,6 +22,7 @@ add_executable(brtools-tests
     tests/string_bit_index_type_test.cpp
     tests/stringtrie_test.cpp
     tests/varint_test.cpp
+    tests/uint_test.cpp
 )
 
 add_dependencies(brtools-tests googletest)
