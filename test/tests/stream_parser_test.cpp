@@ -61,14 +61,28 @@ TEST(stream_parser, templated_read_method_1_byte)
  */
 TEST(stream_parser, read_1_byte)
 {
-    const auto STM_CONTENT = "abcdefg"s;
-    istringstream stm(STM_CONTENT);
-    stream_parser sp(stm);
+    {   // Test 1: ASCII characters
+        const auto STM_CONTENT = "abcdefg"s;
+        istringstream stm(STM_CONTENT);
+        stream_parser sp(stm);
 
-    for (const auto byte : STM_CONTENT)
-    {
-        char c; sp >> c;
-        EXPECT_EQ(byte, c);
+        for (const auto byte : STM_CONTENT)
+        {
+            char c; sp >> c;
+            EXPECT_EQ(byte, c);
+        }
+    }
+
+    {   // Test 2: negative int8_t
+        const auto STM_CONTENT = "\xFF\xFE\xFD\xFC"s;
+        istringstream stm(STM_CONTENT);
+        stream_parser sp(stm);
+
+        for (int8_t expected = -1; expected >= -4; --expected)
+        {
+            int8_t v; sp >> v;
+            EXPECT_EQ(expected, v);
+        }
     }
 }
 
