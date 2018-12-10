@@ -1,27 +1,11 @@
 #include "section_parser.h"
-#include <error/integrity_error.h>
-#include <cinttypes>    // for uint32_t
+#include "../util/integrity_expect.h"
+#include <cstdint>      // for uint32_t
 #include <algorithm>    // for generate
 
+using brtools::util::integrity_expect;
 using namespace brtools::io;
-using namespace brtools::error;
 using namespace std;
-
-namespace
-{
-    void check_section_length(stream_parser& fp, const uint32_t expected_length)
-    {
-        const auto section_length_in_section = fp.read<uint32_t>();
-        if (!integrity_error::suppressed)
-        if (expected_length != section_length_in_section)
-        {
-            throw integrity_error(
-                     "Section length specified in file header is " + to_string(expected_length) + ", "
-                     "but section length specified in section is " + to_string(section_length_in_section) + "."
-                  );
-        }
-    }
-}
 
 section_parser::section_parser(stream_parser& sp, const string::size_type magic_length)
 : _m_sp(sp)
@@ -39,7 +23,7 @@ section_parser::section_parser(stream_parser& sp, const string::size_type magic_
     generate(_m_magic.begin(), _m_magic.end(), bind(&stream_parser::read<char>, &sp));
 
     // verify section size
-    check_section_length(_m_sp, section_length_in_header);
+    integrity_expect("section length", _m_length, _m_sp.read<uint32_t>());
 
     _m_sp.push_offset_base(_m_sp.tell());
 }
