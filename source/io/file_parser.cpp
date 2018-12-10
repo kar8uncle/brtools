@@ -10,7 +10,7 @@ file_parser::file_parser(stream_parser& sp, const string::size_type magic_length
 , _m_magic(magic_length, '\0')
 {
     const auto start_of_file = _m_sp.tell();
-    _m_sp.push_offset_base(start_of_file);
+    _m_offset_scope = _m_sp.push_offset_base(start_of_file);
 
     // populates the file magic
     generate(_m_magic.begin(), _m_magic.end(), bind(&stream_parser::read<char>, &sp));
@@ -30,7 +30,6 @@ file_parser::file_parser(stream_parser& sp, const string::size_type magic_length
 file_parser::~file_parser()
 {
     _m_sp.seek_by_offset_from_base(_m_size);
-    _m_sp.pop_offset_base();
     if (_m_reverse_bytes_on_destruct)
     {
         _m_sp.reverse_byte_order();

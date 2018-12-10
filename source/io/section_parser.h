@@ -3,7 +3,8 @@
 #pragma once
 
 #include "stream_parser.h"
-#include <ios>      // std::streampos
+#include <iosfwd>   // std::streampos
+#include <memory>   // std::unique_ptr
 #include <string>
 
 namespace brtools
@@ -41,7 +42,7 @@ namespace io
          * Causes internal input stream to start from after the offset
          * and size.
          */
-        ~section_parser();
+        virtual ~section_parser();
 
     public:
         /**
@@ -49,16 +50,32 @@ namespace io
          */
         std::string section_magic() const;
 
-    private:
+        /**
+         * Retrieves the section length as read from the section header.
+         */
+        uint32_t section_length() const;
+
+    protected:
         /**
          * The underlying stream_parser.
          */
         stream_parser& _m_sp;
 
+    private:
         /**
          * The magic read from the header of this section.
          */
         std::string    _m_magic;
+
+        /**
+         * The length read from the header of this section.
+         */
+        uint32_t       _m_length;
+
+        /**
+         * Manages lifecycle of offset base pushed during construction.
+         */
+        std::unique_ptr<stream_parser::offset_scope> _m_offset_scope;
 
         /**
          * Position that should be seeked to when this is destructed.

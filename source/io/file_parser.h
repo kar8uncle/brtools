@@ -3,7 +3,6 @@
 #pragma once
 
 #include "stream_parser.h"
-#include <ios>      // std::streampos
 #include <cstdint>  // uint16_t
 #include <string>
 
@@ -26,7 +25,7 @@ namespace io
 
     public:    
         /**
-         * Reads header of file and extracts magic. Determine if byte
+         * Reads header of file and extracts magic. Determines if byte
          * needs to be reversed. User of this class can perform further 
          * parsing after construction.
          *
@@ -41,10 +40,10 @@ namespace io
          * that is, streampos at construction + file size specified in
          * the file header.
          *
-         * Re-reverse the bytes if bytes are set to reverse during con-
+         * Re-reverses the bytes if bytes are set to reverse during con-
          * struction of this instance.
          */
-        ~file_parser();
+        virtual ~file_parser();
 
     public: // file info in header
         /**
@@ -67,12 +66,13 @@ namespace io
          */
         file_size_type file_size() const;
 
-    private:
+    protected:
         /**
          * The underlying stream_parser.
          */
         stream_parser&    _m_sp;
 
+    private:
         /**
          * The magic read from the header of this section.
          */
@@ -98,6 +98,12 @@ namespace io
          * File size read from file header.
          */
         file_size_type    _m_size;
+
+        /**
+         * Manages lifecycle of offset base pushed to stream_parser during
+         * construction.
+         */
+        std::unique_ptr<stream_parser::offset_scope> _m_offset_scope;
     };
 }
 }

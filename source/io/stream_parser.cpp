@@ -50,29 +50,27 @@ void stream_parser::seek(const streampos absolute_pos)
     _m_stream_in.seekg(absolute_pos);
 }
 
-void stream_parser::push_offset_base(const streampos absolute_pos)
+stream_parser::offset_scope::offset_scope(stack<streampos>& offset_bases)
+: _m_offset_bases(offset_bases)
+{}
+
+stream_parser::offset_scope::~offset_scope()
 {
-    _m_offset_bases.push(absolute_pos);
+    _m_offset_bases.pop();
 }
 
-void stream_parser::push_offset_base(const streamoff relative_pos)
+unique_ptr<stream_parser::offset_scope> stream_parser::push_offset_base(const streampos absolute_pos)
 {
-    push_offset_base(_m_offset_bases.top() + relative_pos);
+    _m_offset_bases.push(absolute_pos);
+    return make_unique<offset_scope>(_m_offset_bases);
+}
+
+unique_ptr<stream_parser::offset_scope> stream_parser::push_offset_base(const streamoff relative_pos)
+{
+    return push_offset_base(_m_offset_bases.top() + relative_pos);
 }
 
 void stream_parser::seek_by_offset_from_base(const streamoff offset)
 {
     _m_stream_in.seekg(_m_offset_bases.top() + offset);
 }
-
-void stream_parser::pop_offset_base()
-{
-    if (_m_offset_bases.size() == 1)
-    {
-        // this is the initial 0x00 offset and should not be popped.
-        throw logic_error("No more offset to pop.");
-    }
-
-    _m_offset_bases.pop();
-}
-

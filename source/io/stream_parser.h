@@ -69,6 +69,20 @@ namespace io
          */
         void seek(std::streampos);
 
+    public:
+        /**
+         * RAII-style object to ensure pushed offset bases are properly popped
+         * when the offset_scope goes out of scope.
+         */
+        struct offset_scope
+        {
+            offset_scope(std::stack<std::streampos>&);
+            ~offset_scope();
+
+        private:
+            std::stack<std::streampos>& _m_offset_bases;
+        };
+
     public: // offset related
         /**
          * Pushes a scope where offsets specified in subsequent calls to 
@@ -78,7 +92,7 @@ namespace io
          * @param absolute_pos The absolute position in the stream to use as the
          *                     offset base.
          */
-        void push_offset_base(std::streampos absolute_pos);
+        std::unique_ptr<offset_scope> push_offset_base(std::streampos absolute_pos);
 
         /**
          * Pushes a scope where offsets specified in subsequent calls to 
@@ -89,7 +103,7 @@ namespace io
          *                     offset base; that is, relative_pos + current off-
          *                     set base is the new offset base.
          */
-        void push_offset_base(std::streamoff relative_pos);
+        std::unique_ptr<offset_scope> push_offset_base(std::streamoff relative_pos);
 
         /**
          * Seeks to the position in the stream offset by the given offset from
@@ -100,14 +114,6 @@ namespace io
          * std::streampos(0x0).
          */
         void seek_by_offset_from_base(std::streamoff);
-
-        /**
-         * Pops the last pushed scope of offset base change.
-         *
-         * @throws std::logic_error if there is already no more offset base to
-         *                            pop before popping.
-         */
-        void pop_offset_base();
 
     private:
         std::istream&              _m_stream_in;

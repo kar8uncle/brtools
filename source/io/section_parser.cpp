@@ -12,7 +12,7 @@ section_parser::section_parser(stream_parser& sp, const string::size_type magic_
 , _m_magic(magic_length, '\0')
 {
     const streamoff section_offset = _m_sp.read<uint32_t>();
-    const auto section_length_in_header = _m_sp.read<uint32_t>();
+    _m_sp >> _m_length;
 
     _m_seek_to_on_destruct = _m_sp.tell();
 
@@ -25,16 +25,20 @@ section_parser::section_parser(stream_parser& sp, const string::size_type magic_
     // verify section size
     integrity_expect("section length", _m_length, _m_sp.read<uint32_t>());
 
-    _m_sp.push_offset_base(_m_sp.tell());
+    _m_offset_scope = _m_sp.push_offset_base(_m_sp.tell());
 }
 
 section_parser::~section_parser()
 {
-    _m_sp.pop_offset_base();
     _m_sp.seek(_m_seek_to_on_destruct);
 }
 
 string section_parser::section_magic() const
 {
     return _m_magic;
+}
+
+uint32_t section_parser::section_length() const
+{
+    return _m_length;
 }

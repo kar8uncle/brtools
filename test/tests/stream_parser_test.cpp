@@ -252,61 +252,51 @@ TEST(stream_parser, offset_scoping)
         EXPECT_EQ('1', sp.read<char>());
     }
     
-    {   // Test 1: pushing and popping an absolute base is a no-op
+    {   // Test 1: pushing and popping(discarding return value) an absolute
+        //         base is a no-op
         sp.push_offset_base(streampos(0x5));
-        sp.pop_offset_base();
         sp.seek_by_offset_from_base(0x1);
         EXPECT_EQ('1', sp.read<char>());
     }
     
-    {   // Test 2: pushing and popping a relative base is a no-op
+    {   // Test 2: pushing and popping(discarding return value) a relative
+        //         base is a no-op
         sp.push_offset_base(streamoff(0x5));
-        sp.pop_offset_base();
         sp.seek_by_offset_from_base(0x1);
         EXPECT_EQ('1', sp.read<char>());
     }
 
     {   // Test 3: pushing an absolute base, seek by offset then read
-        sp.push_offset_base(streampos(0x1));
+        const auto scope = sp.push_offset_base(streampos(0x1));
         sp.seek_by_offset_from_base(0x0);
         EXPECT_EQ('1', sp.read<char>());
-        sp.pop_offset_base();
     }
 
     {   // Test 4: pushing an absolute base, a former seek by offset doesn't affect the latter seek
-        sp.push_offset_base(streampos(0x1));
+        const auto scope = sp.push_offset_base(streampos(0x1));
         sp.seek_by_offset_from_base(0x5);
         sp.seek_by_offset_from_base(0x0);
         EXPECT_EQ('1', sp.read<char>());
-        sp.pop_offset_base();
     }
 
     {   // Test 5: pushing an absolute base, pushing a positive relative base, seek by offset then read
-        sp.push_offset_base(streampos(0x1));
+        const auto outer_scope = sp.push_offset_base(streampos(0x1));
         {
-            sp.push_offset_base(streamoff(0x1));
+            const auto inner_scope = sp.push_offset_base(streamoff(0x1));
             sp.seek_by_offset_from_base(0x1);
             EXPECT_EQ('3', sp.read<char>());
-            sp.pop_offset_base();
         }
         sp.seek_by_offset_from_base(0x1);
         EXPECT_EQ('2', sp.read<char>());
-        sp.pop_offset_base();
     }
 
     {   // Test 6: pushing an absolute base, pushing a negative relative base, seek by offset then read
-        sp.push_offset_base(streampos(0x1));
+        const auto outer_scope = sp.push_offset_base(streampos(0x1));
         {
-            sp.push_offset_base(streamoff(-0x1));
+            const auto inner_scope = sp.push_offset_base(streamoff(-0x1));
             sp.seek_by_offset_from_base(0x1);
             EXPECT_EQ('1', sp.read<char>());
-            sp.pop_offset_base();
         }
-        sp.pop_offset_base();
-    }
-
-    {   // Test 7: popping before pushing is a logic_error.
-        EXPECT_THROW(sp.pop_offset_base(), logic_error);
     }
 }
 
