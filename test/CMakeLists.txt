@@ -23,6 +23,7 @@ add_executable(brtools-tests
     tests/stringtrie_test.cpp
     tests/varint_test.cpp
     tests/uint_test.cpp
+    tests/random_test.cpp
 )
 
 add_dependencies(brtools-tests googletest)
