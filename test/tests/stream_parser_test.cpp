@@ -43,6 +43,25 @@ TEST_F(stream_parser_fixture, templated_read_method_1_byte)
 }
 
 /**
+ * Tests reading one byte at a time using the templated stream_parser::peek.
+ * Ensures that the reading position didn't change.
+ */
+TEST_F(stream_parser_fixture, templated_peek_method_1_byte)
+{
+    const auto STM_CONTENT = "abcdefg"s;
+    istringstream stm(STM_CONTENT);
+    stream_parser sp = parser(stm);
+
+    for (const auto byte : STM_CONTENT)
+    {
+        const auto curr = sp.tell();
+        EXPECT_EQ(byte, sp.peek<uint8_t>());
+        EXPECT_EQ(curr, sp.tell());
+        EXPECT_EQ(byte, sp.read<uint8_t>());
+    }
+}
+
+/**
  * Tests reading one byte at a time using the stream operator.
  */
 TEST_F(stream_parser_fixture, read_1_byte)

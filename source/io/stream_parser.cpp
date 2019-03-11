@@ -45,6 +45,11 @@ streampos stream_parser::tell() const
     return _m_stream_in.tellg();
 }
 
+streamoff stream_parser::tell_offset_from_base() const
+{
+    return tell() - _m_offset_bases.top();
+}
+
 void stream_parser::seek(const streampos absolute_pos)
 {
     _m_stream_in.seekg(absolute_pos);

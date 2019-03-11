@@ -11,26 +11,20 @@ section_parser::section_parser(stream_parser& sp, const string::size_type magic_
 : _m_sp(sp)
 , _m_magic(magic_length, '\0')
 {
-    const streamoff section_offset = _m_sp.read<uint32_t>();
-    _m_sp >> _m_length;
-
-    _m_seek_to_on_destruct = _m_sp.tell();
-
-    // jump to start of section
-    _m_sp.seek_by_offset_from_base(section_offset);
+    _m_end_of_section = _m_sp.tell();
 
     // populates the section magic
     generate(_m_magic.begin(), _m_magic.end(), bind(&stream_parser::read<char>, &sp));
 
-    // verify section size
-    integrity_expect("section length", _m_length, _m_sp.read<uint32_t>());
+    sp >> _m_length;
+    _m_end_of_section += _m_length;
 
     _m_offset_scope = _m_sp.push_offset_base(_m_sp.tell());
 }
 
 section_parser::~section_parser()
 {
-    _m_sp.seek(_m_seek_to_on_destruct);
+    _m_sp.seek(_m_end_of_section);
 }
 
 string section_parser::section_magic() const
@@ -41,4 +35,9 @@ string section_parser::section_magic() const
 uint32_t section_parser::section_length() const
 {
     return _m_length;
+}
+
+bool section_parser::has_data_to_read() const
+{
+    return _m_sp.tell() < _m_end_of_section;
 }

@@ -21,9 +21,6 @@ namespace io
     {
     public:    
         /**
-         * Reads offset and size of section, then jumps to the section
-         * for user of this parser to perform further parsing.
-         *
          * Reads and populates the section magic read from header.
          *
          * Checks if section size specified in the section matches with
@@ -37,6 +34,7 @@ namespace io
          *                         that specified within the section.
          */
         section_parser(stream_parser& sp, std::string::size_type magic_length = 4);
+        section_parser(section_parser&&) = default;
 
         /**
          * Causes internal input stream to start from after the offset
@@ -54,6 +52,12 @@ namespace io
          * Retrieves the section length as read from the section header.
          */
         uint32_t section_length() const;
+
+    public:
+        /**
+         * Indicates whether there is still data in the section to read.
+         */
+        bool has_data_to_read() const;
 
     protected:
         /**
@@ -78,9 +82,9 @@ namespace io
         std::unique_ptr<stream_parser::offset_scope> _m_offset_scope;
 
         /**
-         * Position that should be seeked to when this is destructed.
+         * Position of the end of this section. Seeked to on destruction.
          */
-        std::streampos _m_seek_to_on_destruct;
+        std::streampos _m_end_of_section;
     };
 }
 }

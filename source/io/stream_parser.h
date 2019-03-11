@@ -45,6 +45,15 @@ namespace io
          */
         std::unique_ptr<const char[]> read(size_t number_of_bytes = 1);
 
+        template<typename Tp>
+        Tp peek() const
+        {
+            const auto pos = tell();
+            const auto v = const_cast<stream_parser*>(this)->read<Tp>();
+            const_cast<stream_parser*>(this)->seek(pos);
+            return v;
+        }
+
         /**
          * Reads a value of type Tp from the parser. Alias of the stream operator.
          * Typically Tp is an integral type, but since the stream operator can be
@@ -59,9 +68,15 @@ namespace io
 
     public: // position related
         /**
-         * Retrives the current stream position being read.
+         * Retrieves the current stream position being read.
          */
         std::streampos tell() const;
+
+        /**
+         * Retrieves the offset of the current stream position relative to the
+         * current offset base.
+         */
+        std::streamoff tell_offset_from_base() const;
 
         /**
          * Changes the current stream position being read to the given absolute

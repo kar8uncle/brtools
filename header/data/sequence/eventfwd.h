@@ -1,0 +1,92 @@
+#ifndef BRTOOLS_DATA_SEQUENCE_EVENTFWD_H
+#define BRTOOLS_DATA_SEQUENCE_EVENTFWD_H
+#pragma once
+
+namespace brtools
+{
+namespace data
+{
+namespace sequence
+{
+    struct event;
+    struct note_on;
+    struct wait;
+    struct track_usage;
+    struct program;
+    struct open_track;
+    struct jump;
+    struct call;
+    struct random;
+    struct variable;
+    struct if_statement;
+    struct time;
+    struct time_random;
+    struct time_variable;
+    struct timebase;
+    struct environment_hold;
+    struct polyphony;
+    struct velocity_range;
+    struct biquad_type;
+    struct biquad_value;
+    struct pan;
+    struct volume;
+    struct main_volume;
+    struct transpose;
+    struct pitch_bend;
+    struct pitch_bend_range;
+    struct priority;
+    struct note_wait;
+    struct tie;
+    struct portamento_control;
+    struct modulation_type;
+    struct modulation_depth;
+    struct modulation_speed;
+    struct modulation_range;
+    struct modulation_delay;
+    struct portamento_switch;
+    struct portamento_time;
+    struct attack;
+    struct decay;
+    struct sustain;
+    struct release;
+    struct loop_start;
+    struct loop_end;
+    struct expression;
+    struct print;
+    struct surround_pan;
+    struct low_pass_filter_cutoff;
+    struct effect_send_a;
+    struct effect_send_b;
+    struct effect_send_c;
+    struct main_send;
+    struct initial_pan;
+    struct mute;
+    struct damper;
+    struct tempo;
+    struct sweep_pitch;
+    struct set_v;
+    struct add_v;
+    struct sub_v;
+    struct mul_v;
+    struct div_v;
+    struct shift_v;
+    struct rand_v;
+    struct and_v;
+    struct or_v;
+    struct xor_v;
+    struct not_v;
+    struct mod_v;
+    struct eq_v;
+    struct ge_v;
+    struct gt_v;
+    struct le_v;
+    struct lt_v;
+    struct ne_v;
+    struct userproc_v;
+    struct environment_reset;
+    struct ret;
+    struct fin;
+}
+}
+}
+#endif

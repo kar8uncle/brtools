@@ -15,6 +15,8 @@ add_subdirectory(
 )
 
 add_library(brtools STATIC
+    source/data/sequence/parser.cpp
+    source/data/sequence/sequence.cpp
     source/data/types/random.cpp
     source/data/types/variable.cpp
 

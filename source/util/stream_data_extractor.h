@@ -2,6 +2,7 @@
 #define BRTOOLS_UTIL_STREAM_DATA_EXTRACTOR_H
 #pragma once
 
+#include <utility>  // declval
 #include <tuple>
 #include <io/stream_parser.h>
 
@@ -39,11 +40,31 @@ namespace util
      *
      * Useful for variable, random events.
      */ 
-    template<typename Extractor, typename BindType>
-    using type_bind = void;
+    template<typename BindType, typename... HeadTypes, typename TailType>
+    auto type_bind(const stream_data_extractor<TailType>&)
+    -> stream_data_extractor<HeadTypes..., BindType>;
 
-    template<typename... HeadTypes, typename TailType, typename BindType>
-    using type_bind<stream_data_extractor<HeadTypes..., TailType>, BindType> = stream_data_extractor<HeadTypes..., BindType>;
+    template<typename BindType, typename... HeadTypes, typename HeadType, typename... TailTypes>
+    auto type_bind(const stream_data_extractor<HeadType, TailTypes...>&)
+    -> decltype(type_bind<BindType, HeadTypes..., HeadType>(std::declval<stream_data_extractor<TailTypes...>>()));
+
+    /**
+     * Convenience template to get the last stream data type.
+     *
+     * Useful for determining the sign of the type.
+     */
+    template<typename Extractor>
+    struct last_type_of_extractor;
+
+    template<typename Type>
+    struct last_type_of_extractor<stream_data_extractor<Type>>
+    {   using type = Type; };
+
+    template<typename HeadType, typename... TailTypes>
+    struct last_type_of_extractor<stream_data_extractor<HeadType, TailTypes...>>
+    {
+        using type = last_type_of_extractor<stream_data_extractor<TailTypes...>>;
+    };
 }
 }
 #endif
