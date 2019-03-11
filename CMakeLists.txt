@@ -16,6 +16,7 @@ add_subdirectory(
 
 add_library(brtools STATIC
     source/data/types/random.cpp
+    source/data/types/variable.cpp
 
     source/error/errors.cpp
     source/error/integrity_error.cpp

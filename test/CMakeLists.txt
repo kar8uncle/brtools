@@ -16,6 +16,8 @@ ExternalProject_Add(googletest
 link_directories(${CMAKE_ARCHIVE_OUTPUT_DIRECTORY})
 
 add_executable(brtools-tests
+    mocks/mock_sequence_visitor.cpp
+
     tests/stream_parser_test.cpp
     tests/section_parser_test.cpp
     tests/file_parser_test.cpp
@@ -24,6 +26,7 @@ add_executable(brtools-tests
     tests/varint_test.cpp
     tests/uint_test.cpp
     tests/random_test.cpp
+    tests/variable_test.cpp
 )
 
 add_dependencies(brtools-tests googletest)
@@ -34,13 +37,15 @@ target_compile_features(brtools-tests PRIVATE
 
 target_include_directories(brtools-tests
     PUBLIC "${GTEST_SOURCE_DIR}/googletest/include"
-    PRIVATE ../source
-    PRIVATE ../include
+    PRIVATE "${PROJECT_SOURCE_DIR}/source"
+    PRIVATE "${PROJECT_SOURCE_DIR}/include"
+    PRIVATE "."
 )
 
 target_link_libraries(brtools-tests
     brtools
     gtest
+    gmock
     gtest_main
 )
 
