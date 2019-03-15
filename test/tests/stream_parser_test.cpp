@@ -1,5 +1,6 @@
 #include <gtest/gtest.h>
 #include <io/stream_parser.h>
+#include <fixtures/stream_parser_fixture.h>
 
 #include <sstream>      // istringstream
 #include <cstdint>      // uint8_t, uint16_t, uint32_t
@@ -10,30 +11,15 @@ using namespace ::testing;
 using namespace std;
 using namespace brtools::io;
 
-namespace
-{
-    /**
-     * We don't know the endianness of the machine, so it is imperative that we
-     * check if we need to reverse the byte order in order to run the tests in
-     * a deterministic fashion. For readability, let's use big endian.
-     */
-    bool needs_reverse_byte_order()
-    {
-        const auto BYTE_ORDER_MARK = "\xFF\xFE"s;
-        istringstream stm(BYTE_ORDER_MARK);
-        return stream_parser(stm).read<uint16_t>() != 0xFFFE;
-    }
-}
-
 /**
  * Tests reading one byte at a time using the stream_parser::read. This is the
  * only test that uses the lower-level read method.
  */
-TEST(stream_parser, read_method_1_byte)
+TEST_F(stream_parser_fixture, read_method_1_byte)
 {
     const auto STM_CONTENT = "abcdefg"s;
     istringstream stm(STM_CONTENT);
-    stream_parser sp(stm);
+    stream_parser sp = parser(stm);
 
     for (const auto byte : STM_CONTENT)
     {
@@ -44,11 +30,11 @@ TEST(stream_parser, read_method_1_byte)
 /**
  * Tests reading one byte at a time using the templated stream_parser::read.
  */
-TEST(stream_parser, templated_read_method_1_byte)
+TEST_F(stream_parser_fixture, templated_read_method_1_byte)
 {
     const auto STM_CONTENT = "abcdefg"s;
     istringstream stm(STM_CONTENT);
-    stream_parser sp(stm);
+    stream_parser sp = parser(stm);
 
     for (const auto byte : STM_CONTENT)
     {
@@ -59,12 +45,12 @@ TEST(stream_parser, templated_read_method_1_byte)
 /**
  * Tests reading one byte at a time using the stream operator.
  */
-TEST(stream_parser, read_1_byte)
+TEST_F(stream_parser_fixture, read_1_byte)
 {
     {   // Test 1: ASCII characters
         const auto STM_CONTENT = "abcdefg"s;
         istringstream stm(STM_CONTENT);
-        stream_parser sp(stm);
+        stream_parser sp = parser(stm);
 
         for (const auto byte : STM_CONTENT)
         {
@@ -76,7 +62,7 @@ TEST(stream_parser, read_1_byte)
     {   // Test 2: negative int8_t
         const auto STM_CONTENT = "\xFF\xFE\xFD\xFC"s;
         istringstream stm(STM_CONTENT);
-        stream_parser sp(stm);
+        stream_parser sp = parser(stm);
 
         for (int8_t expected = -1; expected >= -4; --expected)
         {
@@ -91,13 +77,13 @@ TEST(stream_parser, read_1_byte)
  * ordering, as long as the value is correctly reversed after stream_parser::
  * reverse_byte_order is called.
  */
-TEST(stream_parser, reverse_8_byte)
+TEST_F(stream_parser_fixture, reverse_8_byte)
 { 
     const auto STM_CONTENT = "\x01\x02\x03\x04\x05\x06\x07\x08"
                              "\x08\x07\x06\x05\x04\x03\x02\x01"
                              ""s;
     istringstream stm(STM_CONTENT);
-    stream_parser sp(stm);
+    stream_parser sp = parser(stm);
 
     uint64_t original; sp >> original;
     sp.reverse_byte_order();
@@ -111,13 +97,13 @@ TEST(stream_parser, reverse_8_byte)
  * care about the initial ordering, as long as the value is correctly reversed
  * after stream_parser::reverse_byte_order is called.
  */
-TEST(stream_parser, reverse_8_byte_templated_read)
+TEST_F(stream_parser_fixture, reverse_8_byte_templated_read)
 { 
     const auto STM_CONTENT = "\x01\x02\x03\x04\x05\x06\x07\x08"
                              "\x08\x07\x06\x05\x04\x03\x02\x01"
                              ""s;
     istringstream stm(STM_CONTENT);
-    stream_parser sp(stm);
+    stream_parser sp = parser(stm);
 
     const auto original = sp.read<uint64_t>();
     sp.reverse_byte_order();
@@ -131,15 +117,11 @@ TEST(stream_parser, reverse_8_byte_templated_read)
  * order depends on the machine, to ensure this test is deterministic, reverses
  * the byte order to emulate a big-endian machine.
  */
-TEST(stream_parser, read_8_bytes)
+TEST_F(stream_parser_fixture, read_8_bytes)
 {
     const auto STM_CONTENT = "\xDE\xAD\xBE\xEF\x0D\x15\xEA\x5E"s;
     istringstream stm(STM_CONTENT);
-    stream_parser sp(stm);
-    if (needs_reverse_byte_order())
-    {
-        sp.reverse_byte_order();
-    }
+    stream_parser sp = parser(stm);
 
     EXPECT_EQ(0xDeadBeef0D15EA5E, sp.read<uint64_t>());
 }
@@ -147,11 +129,11 @@ TEST(stream_parser, read_8_bytes)
 /**
  * Tests that a call to tell immediately after seek yields the same position.
  */
-TEST(stream_parser, seek_tell_integrity)
+TEST_F(stream_parser_fixture, seek_tell_integrity)
 {
     const auto STM_CONTENT = "ABCD"s;
     istringstream stm(STM_CONTENT);
-    stream_parser sp(stm);
+    stream_parser sp = parser(stm);
 
     {   // Test 1: change to read at position 0x1
         const streampos p = 0x1;
@@ -176,11 +158,11 @@ TEST(stream_parser, seek_tell_integrity)
  * Tests that tell returns the correct stream position after reads of different
  * sizes.
  */
-TEST(stream_parser, tell_with_reads)
+TEST_F(stream_parser_fixture, tell_with_reads)
 {
     const auto STM_CONTENT = "ABCDEFGH"s;
     istringstream stm(STM_CONTENT);
-    stream_parser sp(stm);
+    stream_parser sp = parser(stm);
 
     streampos cur_pos = 0x0;
 
@@ -212,11 +194,11 @@ TEST(stream_parser, tell_with_reads)
 /**
  * Tests that seek changes the stream to the correct stream position.
  */
-TEST(stream_parser, read_with_seeks)
+TEST_F(stream_parser_fixture, read_with_seeks)
 {
     const auto STM_CONTENT = "01234567"s;
     istringstream stm(STM_CONTENT);
-    stream_parser sp(stm);
+    stream_parser sp = parser(stm);
 
     {   // Test 0: read 1 byte before seek
         EXPECT_EQ('0', sp.read<char>());
@@ -241,11 +223,11 @@ TEST(stream_parser, read_with_seeks)
 /**
  * Tests the offset scoping related methods.
  */
-TEST(stream_parser, offset_scoping)
+TEST_F(stream_parser_fixture, offset_scoping)
 {
     const auto STM_CONTENT = "01234567"s;
     istringstream stm(STM_CONTENT);
-    stream_parser sp(stm);
+    stream_parser sp = parser(stm);
     
     {   // Test 0: seek by offset before pushing a base
         sp.seek_by_offset_from_base(0x1);
@@ -303,11 +285,11 @@ TEST(stream_parser, offset_scoping)
 /**
  * Tests that reading an empty stream raises an ios_base::failure exception.
  */
-TEST(stream_parser, overreading_empty_stream_exception)
+TEST_F(stream_parser_fixture, overreading_empty_stream_exception)
 {
     const string STM_CONTENT;
     istringstream stm(STM_CONTENT);
-    stream_parser sp(stm);
+    stream_parser sp = parser(stm);
 
     uint32_t read;
     EXPECT_THROW(sp >> read, ios_base::failure);
@@ -318,11 +300,11 @@ TEST(stream_parser, overreading_empty_stream_exception)
  * Tests that reading more than what the stream contains raises an ios_base::
  * failure exception.
  */
-TEST(stream_parser, overreading_nonempty_stream_exception)
+TEST_F(stream_parser_fixture, overreading_nonempty_stream_exception)
 {
     const auto STM_CONTENT = "abc"s;
     istringstream stm(STM_CONTENT);
-    stream_parser sp(stm);
+    stream_parser sp = parser(stm);
 
     uint32_t read;
     EXPECT_THROW(sp >> read, ios_base::failure);
@@ -332,11 +314,11 @@ TEST(stream_parser, overreading_nonempty_stream_exception)
 /**
  * Tests that requesting to read 0 byte raises an invalid_argument exception.
  */
-TEST(stream_parser, read_0_byte_exception)
+TEST_F(stream_parser_fixture, read_0_byte_exception)
 {
     const string STM_CONTENT;
     istringstream stm(STM_CONTENT);
-    stream_parser sp(stm);
+    stream_parser sp = parser(stm);
 
     EXPECT_THROW(sp.read(0), invalid_argument);
 }

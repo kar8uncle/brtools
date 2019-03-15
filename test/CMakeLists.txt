@@ -1,8 +1,9 @@
+cmake_minimum_required(VERSION 3.9)
 set(GTEST_SOURCE_DIR "${PROJECT_SOURCE_DIR}/framework/googletest")
 include(ExternalProject)
 ExternalProject_Add(googletest
     GIT_REPOSITORY    https://github.com/google/googletest.git
-    GIT_TAG           "release-1.8.0"
+    GIT_TAG           "release-1.8.1"
     GIT_SHALLOW       1
     CMAKE_ARGS        -DCMAKE_ARCHIVE_OUTPUT_DIRECTORY=${CMAKE_ARCHIVE_OUTPUT_DIRECTORY}
                       -DCMAKE_LIBRARY_OUTPUT_DIRECTORY=${CMAKE_LIBRARY_OUTPUT_DIRECTORY}

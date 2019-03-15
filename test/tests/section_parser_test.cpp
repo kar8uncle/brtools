@@ -2,6 +2,7 @@
 #include <io/section_parser.h>
 #include <io/stream_parser.h>
 #include <error/integrity_error.h>
+#include <fixtures/stream_parser_fixture.h>
 
 #include <sstream>  // for istringstream
 #include <cstdint>  // for uint8_t, uint16_t
@@ -9,21 +10,7 @@
 using namespace ::testing;
 using namespace std;
 using namespace brtools::io;
-
-namespace
-{
-    /**
-     * We don't know the endianness of the machine, so it is imperative that we
-     * check if we need to reverse the byte order in order to run the tests in
-     * a deterministic fashion. For readability, let's use big endian.
-     */
-    bool needs_reverse_byte_order()
-    {
-        const auto BYTE_ORDER_MARK = "\xFF\xFE"s;
-        istringstream stm(BYTE_ORDER_MARK);
-        return stream_parser(stm).read<uint16_t>() != 0xFFFE;
-    }
-}
+using section_parser_test = stream_parser_fixture;
 
 /**
  * Tests that a well-formed section won't cause section_parser to throw exceptions.
@@ -34,7 +21,7 @@ namespace
  * After section_parser destruction, the next read should yield data just after the
  * section offset and size.
  */
-TEST(section_parser, well_formed_section)
+TEST_F(section_parser_test, well_formed_section)
 {
     const auto STM_CONTENT = "\x00\x00\x00\x0A" // offset to section from base = 10 bytes
                              "\x00\x00\x00\x10" // size of section = 16 bytes
@@ -44,11 +31,7 @@ TEST(section_parser, well_formed_section)
                              "JUNKHERE"         // after construct, next reads should be "JUNKHERE"
                              ""s;
     istringstream stm(STM_CONTENT);
-    stream_parser sp(stm);
-    if (needs_reverse_byte_order())
-    {
-        sp.reverse_byte_order();
-    }
+    stream_parser sp = parser(stm);
 
     {
         section_parser secp(sp);
@@ -68,7 +51,7 @@ using brtools::error::integrity_error;
  * Tests that an integrity_error is thrown if section size specified in section is
  * not equal to that specified outside of the section.
  */
-TEST(section_parser, size_mismatch_exception)
+TEST_F(section_parser_test, size_mismatch_exception)
 {
     const auto STM_CONTENT = "\x00\x00\x00\x0A" // offset to section from base = 10 bytes
                              "\x00\x00\x00\x10" // size of section = 16 bytes
@@ -78,11 +61,7 @@ TEST(section_parser, size_mismatch_exception)
                              "JUNKHERE"         // to make up 16 byte
                              ""s;
     istringstream stm(STM_CONTENT);
-    stream_parser sp(stm);
-    if (needs_reverse_byte_order())
-    {
-        sp.reverse_byte_order();
-    }
+    stream_parser sp = parser(stm);
 
     EXPECT_THROW(section_parser{sp}, integrity_error);
 }
