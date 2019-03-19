@@ -35,6 +35,9 @@ parser::data_section_parser::data_section_parser(stream_parser& sp, const uint32
     integrity_expect("section magic", "DATA", section_magic());
     integrity_expect("section length", expected_section_length, section_length());
     integrity_expect("header length", 0x0C, sp.read<uint32_t>());
+
+    // event offsets are relative to the first event, which is after the header length
+    _m_scope = sp.push_offset_base(sp.tell());
 }
 
 parser::labl_section_parser::labl_section_parser(stream_parser& sp, const uint32_t expected_section_length)

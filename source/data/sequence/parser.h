@@ -25,11 +25,13 @@ namespace sequence
         struct data_section_parser final : io::section_parser
         {
             data_section_parser(io::stream_parser&, uint32_t expected_section_length);
+
+        private:
+            std::unique_ptr<io::stream_parser::offset_scope> _m_scope;
         };
 
         struct labl_section_parser final : io::section_parser
         {
-        public:
             labl_section_parser(io::stream_parser&, uint32_t expected_section_length);
 
             const std::vector<std::pair<std::streamoff, std::string>>& labels() const;

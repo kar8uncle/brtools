@@ -2,7 +2,7 @@
 #define BRTOOLS_DATA_SEQUENCE_EVENTS_H
 #pragma once
 
-#include <ios>      // std::streamoff
+#include <data/sequence/sequence.h>
 #include <data/sequence/eventfwd.h>
 #include <data/sequence/visitable.h>
 #include <data/sequence/visitor_acceptable.h>
@@ -49,19 +49,19 @@ namespace sequence
     struct open_track : event, visitable<open_track>
     {
         virtual size_t track_no() const = 0;
-        virtual std::streamoff offset_to_track_data() const = 0;
+        virtual sequence::event_const_iterator track_data() const = 0;
     };
 
     // 0x89
     struct jump : event, visitable<jump>
     {
-        virtual std::streamoff offset_to_dest_event() const = 0;
+        virtual sequence::event_const_iterator destination() const = 0;
     };
 
     // 0x8A
     struct call : event, visitable<call>
     {
-        virtual std::streamoff offset_to_dest_event() const = 0;
+        virtual sequence::event_const_iterator destination() const = 0;
     };
 
     // 0xA0

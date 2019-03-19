@@ -4,6 +4,7 @@
 
 #include <util/stream_data_extractor.h>
 #include <data/sequence/events.h>
+#include <data/sequence/resolvable.h>
 #include <data/types/uint.h>
 #include <data/types/varint.h>
 #include <data/types/random.h>
@@ -74,6 +75,7 @@ namespace sequence
 
     template<typename Extractor = util::stream_data_extractor<uint8_t, types::uint<24>>>
     struct open_track_impl : open_track
+    , public resolvable
     , public Extractor
     {
         template<typename E> using self = open_track_impl<E>;
@@ -82,30 +84,72 @@ namespace sequence
         size_t track_no() const override
         {   return std::get<0>(this->_m_arguments); }
 
-        std::streamoff offset_to_track_data() const override
-        {   return std::get<1>(this->_m_arguments); }
+        sequence::event_const_iterator track_data() const override
+        {   return {}; }
+
+        std::unique_ptr<event> resolve(const resolver& r) const override
+        {
+            struct resolved_open_track : open_track
+            , std::tuple<size_t, sequence::event_const_iterator>
+            {
+                using std::tuple<size_t, sequence::event_const_iterator>::tuple;
+                size_t track_no() const override
+                {   return std::get<0>(*this); }
+
+                sequence::event_const_iterator track_data() const override
+                {   return std::get<1>(*this); }
+            };
+            return std::make_unique<resolved_open_track>(track_no(), r(std::get<1>(this->_m_arguments)));
+        }
     };
     
     template<typename Extractor = util::stream_data_extractor<types::uint<24>>>
     struct jump_impl : jump
+    , public resolvable
     , public Extractor
     {
         template<typename E> using self = jump_impl<E>;
         using Extractor::Extractor;
         
-        std::streamoff offset_to_dest_event() const override
-        {   return std::get<0>(this->_m_arguments); }
+        sequence::event_const_iterator destination() const override
+        {   return {}; }
+
+        std::unique_ptr<event> resolve(const resolver& r) const override
+        {
+            struct resolved_jump : jump
+            , std::tuple<sequence::event_const_iterator>
+            {
+                using std::tuple<sequence::event_const_iterator>::tuple;
+                sequence::event_const_iterator destination() const override
+                {   return std::get<0>(*this); }
+            };
+            return std::make_unique<resolved_jump>(r(std::get<0>(this->_m_arguments)));
+        }
     };
 
     template<typename Extractor = util::stream_data_extractor<types::uint<24>>>
     struct call_impl : call
+    , public resolvable
     , public Extractor
     {
         template<typename E> using self = call_impl<E>;
         using Extractor::Extractor;
         
-        std::streamoff offset_to_dest_event() const override
-        {   return std::get<0>(this->_m_arguments); }
+        sequence::event_const_iterator destination() const override
+        {   return {}; }
+
+        std::unique_ptr<event> resolve(const resolver& r) const override
+        {
+            struct resolved_call : call
+            , std::tuple<sequence::event_const_iterator>
+            {
+                using std::tuple<sequence::event_const_iterator>::tuple;
+                sequence::event_const_iterator destination() const override
+                {   return std::get<0>(*this); }
+            };
+
+            return std::make_unique<resolved_call>(r(std::get<0>(this->_m_arguments)));
+        }
     };
 
     /**

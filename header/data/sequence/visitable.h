@@ -18,8 +18,8 @@ namespace sequence
     template<typename VisitableType>
     struct visitable : public virtual visitor_acceptable
     {
-        void accept(visitor& visitor) const override
-        {   visitor.visit(static_cast<const VisitableType&>(*this));  }
+        void accept(visitor& visitor, const visitor::operation& op) const override
+        {   visitor.visit(static_cast<const VisitableType&>(*this), op);  }
     };
 }
 }

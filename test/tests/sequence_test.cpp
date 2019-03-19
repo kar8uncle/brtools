@@ -333,7 +333,8 @@ TEST(sequence, one_event)
                 visit(Matcher<const note_on&>(AllOf(Property(&note_on::note,     0x4F),
                                                     Property(&note_on::pitch,    0x29),
                                                     Property(&note_on::velocity, 0x30)
-                                              ))));
+                                              )),
+                      A<const visitor::operation&>()));
 
     seq.traverse(visitor);
 }
@@ -359,7 +360,7 @@ TEST(sequence, multiple_events)
 /* 24 */ "\x00\x00\x00\x23"             // section length
 /* 28 */ "\x00\x00\x00\x0C"             // section header size
 /* 2C */ "\x80\x02"                     // wait: 0x02 ticks
-/* 2E */ "\x88\x04\x00\x0E\x12"         // open track number: 0x04, offset to track: 0x0E12
+/* 2E */ "\x88\x04\x00\x00\x02"         // open track number: 0x04, offset to track: 0x0002, which is this event itself
 /* 33 */ "\xA0\x3C\x7F\x00\xC8\x01\x90" // note: 0x3C, pitch: 0x7F, velocity: random [0x00C8, 0x0190)
 /* 3A */ "\xF0\x80\x10\x00\x0C"         // set variable 0x10 = 0x000C
 /* 3F */ "\xA1\xC6\x10"                 // priority: value in variable 0x10 == 0x0C
@@ -385,13 +386,12 @@ TEST(sequence, multiple_events)
         InSequence s;
         using wait = brtools::data::sequence::wait;
         EXPECT_CALL(visitor, 
-                    visit(Matcher<const wait&>(Property(&wait::tick_count, 0x02))));
+                    visit(Matcher<const wait&>(Property(&wait::tick_count, 0x02)),
+                          A<const visitor::operation&>()));
 
         EXPECT_CALL(visitor, 
-                    visit(Matcher<const open_track&>(AllOf(
-                              Property(&open_track::track_no, 0x04),
-                              Property(&open_track::offset_to_track_data, 0x0E12)
-                          ))));
+                    visit(Matcher<const open_track&>(Property(&open_track::track_no, 0x04)),
+                          A<const visitor::operation&>()));
 
         using random = brtools::data::sequence::random;
         EXPECT_CALL(visitor, 
@@ -403,13 +403,15 @@ TEST(sequence, multiple_events)
                                   Property(&note_on::pitch, 0x7F),
                                   Property(&note_on::velocity, AllOf(Ge(0x00C8), Lt(0x0190)))
                               )))
-                          ))));
+                          )),
+                          A<const visitor::operation&>()));
 
         EXPECT_CALL(visitor,
                     visit(Matcher<const set_v&>(AllOf(
                               Property(&set_v::l_operand_var, 0x10),
                               Property(&set_v::r_operand_val, 0x000C)
-                          ))));
+                          )),
+                          A<const visitor::operation&>()));
 
         EXPECT_CALL(visitor,
                     visit(Matcher<const variable&>(AllOf(
@@ -418,9 +420,128 @@ TEST(sequence, multiple_events)
                               Property(&variable::event, WhenDynamicCastTo<const priority&>(
                                   Property(&priority::priority_value, 0x0C)
                               ))
-                          ))));
+                          )),
+                          A<const visitor::operation&>()));
 
-        EXPECT_CALL(visitor, visit(A<const fin&>()));
+        EXPECT_CALL(visitor, visit(A<const fin&>(), A<const visitor::operation&>()));
+    }
+
+    seq.traverse(visitor);
+}
+
+/**
+ * Tests the reference resolving and traversal order of call, jump, ret, and loops.
+ */
+TEST(sequence, reference_resolving_and_traversal_ordering)
+{
+    const auto STM_CONTENT =
+/* 00 */ "RSEQ"                     // file magic
+/* 04 */ "\xFE\xFF"                 // big endian BOM
+/* 06 */ "\x01\x00"                 // file version
+/* 08 */ "\x00\x00\x00\x5C"         // file length
+/* 0C */ "\x00\x20"                 // file header length
+/* 0E */ "\x00\x02"                 // number of file sections
+/* 10 */ "\x00\x00\x00\x20"         // offset to DATA section
+/* 14 */ "\x00\x00\x00\x25"         // length of DATA section
+/* 18 */ "\x00\x00\x00\x50"         // offset to LABL section
+/* 1C */ "\x00\x00\x00\x0C"         // length of LABL section
+
+/* 20 */ "DATA"                     // section magic
+/* 24 */ "\x00\x00\x00\x25"         // section length
+/* 28 */ "\x00\x00\x00\x0C"         // section header size
+/* 2C */ "\x80\x01"                 // wait: 0x01 tick
+         // jump test
+/* 2E */ "\x89\x00\x00\x08"         // jump to 0x2C + 0x08 = 0x34
+/* 32 */ "\x80\x02"                 // skipped - wait: 0x02 ticks
+/* 34 */ "\x80\x03"                 // wait: 0x03 ticks
+         // loop test
+/* 36 */ "\xD4\x01"                 // loop: 1 time
+/* 38 */ "\x80\x04"                 // wait: 0x04 ticks, twice
+/* 3A */ "\xFC"                     // loop end
+         // call test               
+/* 3B */ "\x8A\x00\x00\x16"         // call to 0x2C + 0x16 = 0x42
+/* 3F */ "\x80\x05"                 // wait: 0x05 ticks
+/* 41 */ "\xFF"                     // fin
+/* 42 */ "\x80\x06"                 // wait: 0x06 ticks
+/* 44 */ "\xFD"                     // return to 0x3F
+
+/* 45 */ "\x00\x00\x00\x00\x00"     // padding
+/* 4A */ "\x00\x00\x00\x00\x00\x00" // padding
+
+/* 50 */ "LABL"                     // section magic
+/* 54 */ "\x00\x00\x00\x0C"         // section length
+/* 58 */ "\x00\x00\x00\x00"         // number of labels: 0
+/* 5C */ ""s;
+
+    istringstream stm(STM_CONTENT);
+    const auto seq = sequence::make_sequence(stm);
+    mock_sequence_visitor visitor;
+
+    {   // expectations in order
+        InSequence s;
+        using wait = brtools::data::sequence::wait;
+
+        // sanity
+        EXPECT_CALL(visitor, 
+                    visit(Matcher<const wait&>(Property(&wait::tick_count, 0x01)),
+                          A<const visitor::operation&>()));
+
+        {   // jump expectations
+            EXPECT_CALL(visitor, 
+                        visit(A<const jump&>(), A<const visitor::operation&>()));
+
+            // the jump should skip a wait event of 0x02 ticks
+            EXPECT_CALL(visitor, 
+                        visit(Matcher<const wait&>(Property(&wait::tick_count, 0x03)),
+                              A<const visitor::operation&>()));
+        }
+
+        {   // loop expectations
+            EXPECT_CALL(visitor, 
+                        visit(Matcher<const loop_start&>(Property(&loop_start::times, 0x01)),
+                              A<const visitor::operation&>()));
+
+            // first time
+            EXPECT_CALL(visitor, 
+                        visit(Matcher<const wait&>(Property(&wait::tick_count, 0x04)),
+                              A<const visitor::operation&>()));
+
+            // loop back, for once
+            EXPECT_CALL(visitor, 
+                        visit(A<const loop_end&>(), A<const visitor::operation&>()))
+                .WillOnce(Invoke([](const auto&, const auto& vop) { vop.goto_loop_start(); } ));
+
+            // second time
+            EXPECT_CALL(visitor, 
+                        visit(Matcher<const wait&>(Property(&wait::tick_count, 0x04)),
+                              A<const visitor::operation&>()));
+
+            // exit loop
+            EXPECT_CALL(visitor, 
+                        visit(A<const loop_end&>(), A<const visitor::operation&>()))
+                .WillOnce(Invoke([](const auto&, const auto& vop) { vop.end_loop(); } ));
+        }
+
+        {   // call expectations
+            EXPECT_CALL(visitor, 
+                        visit(A<const call&>(), A<const visitor::operation&>()));
+
+            EXPECT_CALL(visitor, 
+                        visit(Matcher<const wait&>(Property(&wait::tick_count, 0x06)),
+                              A<const visitor::operation&>()));
+
+            EXPECT_CALL(visitor, 
+                        visit(A<const ret&>(), A<const visitor::operation&>()));
+
+            EXPECT_CALL(visitor, 
+                        visit(Matcher<const wait&>(Property(&wait::tick_count, 0x05)),
+                              A<const visitor::operation&>()));
+        }
+
+        // we should end the traversal after the fin,
+        // since events that come after it are part of the subroutine call
+        EXPECT_CALL(visitor, visit(A<const fin&>(), A<const visitor::operation&>()))
+            .WillOnce(Invoke([](const auto&, const auto& vop) { vop.end(); } ));
     }
 
     seq.traverse(visitor);

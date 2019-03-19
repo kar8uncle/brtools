@@ -4,7 +4,8 @@
 
 #include <memory>   // for unique_ptr
 #include <iosfwd>   // for forward-declaration of istream
-#include <vector>
+#include <string>
+#include <list>
 #include <unordered_map>
 #include <util/unit_testable.h>
 
@@ -26,11 +27,18 @@ namespace sequence
     {
         BRTOOLS_UNIT_TESTABLE
     public:
+        using event_container = std::list<std::unique_ptr<event>>;
+        using event_const_iterator = event_container::const_iterator;
+        using event_iterator       = event_container::iterator;
+
         static sequence make_sequence(std::istream&);
         void traverse(visitor&) const;
+
     private:
-        std::vector<std::unique_ptr<event>>     _m_events;
-        std::unordered_map<std::string, size_t> _m_labels;
+        using label_event_map = std::unordered_map<std::string, event_const_iterator>;
+
+        event_container _m_events;
+        label_event_map _m_label_2_event;
     };
 }
 }
