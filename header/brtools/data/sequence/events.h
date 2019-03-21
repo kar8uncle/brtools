@@ -212,7 +212,7 @@ namespace sequence
     // 0xCA
     struct modulation_depth : event, visitable<modulation_depth>
     {
-        virtual bool on() const = 0;
+        virtual uint8_t value() const = 0;
     };
 
     // 0xCB

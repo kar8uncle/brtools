@@ -409,7 +409,7 @@ namespace sequence
     {
         template<typename E> using self = modulation_depth_impl<E>;
         using Extractor::Extractor;
-        bool on() const override
+        uint8_t value() const override
         {   return std::get<0>(this->_m_arguments); }
     };
 

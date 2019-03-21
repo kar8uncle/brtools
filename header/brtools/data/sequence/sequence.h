@@ -15,8 +15,8 @@ namespace data
 {
 namespace sequence
 {
-    class event;
     class visitor;
+    class event;
 
     /**
      * Represents sequenced music containing events.
