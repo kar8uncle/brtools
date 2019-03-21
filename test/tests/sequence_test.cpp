@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
-#include <data/sequence/sequence.h>
-#include <data/types/variable.h>
-#include <error/integrity_error.h>
+#include <brtools/data/sequence/sequence.h>
+#include <brtools/data/types/variable.h>
+#include <brtools/error/integrity_error.h>
 
 #include <mocks/mock_sequence_visitor.h>
 

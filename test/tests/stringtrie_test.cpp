@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include <trie/stringtrie.h>
+#include <brtools/trie/stringtrie.h>
 #include <initializer_list>
 #include <string>
 #include <stdexcept>

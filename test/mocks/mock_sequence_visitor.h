@@ -3,8 +3,8 @@
 #pragma once
 
 #include <gmock/gmock.h>
-#include <data/sequence/visitor.h>
-#include <data/sequence/events.h>
+#include <brtools/data/sequence/visitor.h>
+#include <brtools/data/sequence/events.h>
 
 class mock_sequence_visitor : public brtools::data::sequence::visitor
 {

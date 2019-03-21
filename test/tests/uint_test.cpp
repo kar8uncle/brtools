@@ -2,8 +2,8 @@
 
 #include <sstream>      // istringstream
 
-#include <data/types/uint.h>
-#include <io/stream_parser.h>
+#include <brtools/data/types/uint.h>
+#include <brtools/io/stream_parser.h>
 #include <fixtures/stream_parser_fixture.h>
 
 using namespace ::testing;

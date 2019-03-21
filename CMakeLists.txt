@@ -10,25 +10,22 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 enable_testing()
 
-add_subdirectory(
-    "${PROJECT_SOURCE_DIR}/test"
-)
+add_subdirectory("${PROJECT_SOURCE_DIR}/test")
 
 add_library(brtools STATIC
-    source/data/sequence/parser.cpp
-    source/data/sequence/sequence.cpp
-    source/data/types/random.cpp
-    source/data/types/variable.cpp
+    source/brtools/data/sequence/parser.cpp
+    source/brtools/data/sequence/sequence.cpp
+    source/brtools/data/types/random.cpp
+    source/brtools/data/types/variable.cpp
 
-    source/error/errors.cpp
-    source/error/integrity_error.cpp
+    source/brtools/error/errors.cpp
+    source/brtools/error/integrity_error.cpp
 
-    source/io/stream_parser.cpp 
-    source/io/section_parser.cpp 
-    source/io/file_parser.cpp
+    source/brtools/io/stream_parser.cpp 
+    source/brtools/io/section_parser.cpp 
+    source/brtools/io/file_parser.cpp
 
-    source/trie/stringtrie.cpp
-
+    source/brtools/trie/stringtrie.cpp
 )
 
 set_target_properties(brtools PROPERTIES

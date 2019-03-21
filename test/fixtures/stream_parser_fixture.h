@@ -3,7 +3,7 @@
 #pragma once
 
 #include <gtest/gtest.h>
-#include <io/stream_parser.h>
+#include <brtools/io/stream_parser.h>
 
 #include <sstream>  // std::istringstream
 #include <utility>  // std::forward

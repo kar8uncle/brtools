@@ -1,8 +1,8 @@
 #include <gtest/gtest.h>
 
 #include <sstream>
-#include <data/types/variable.h>
-#include <io/stream_parser.h>
+#include <brtools/data/types/variable.h>
+#include <brtools/io/stream_parser.h>
 #include <fixtures/stream_parser_fixture.h>
 
 using namespace ::testing;

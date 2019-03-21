@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
-#include <io/stream_parser.h>
-#include <io/file_parser.h>
+#include <brtools/io/stream_parser.h>
+#include <brtools/io/file_parser.h>
 
 #include <sstream>  // for istringstream
 

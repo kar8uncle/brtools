@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include <trie/detail/string_bit_index_type.h>
+#include <brtools/trie/detail/string_bit_index_type.h>
 
 #include <cstdint>      // uint16_t
 #include <type_traits>  // integral_constant

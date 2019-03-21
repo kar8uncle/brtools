@@ -2,8 +2,8 @@
 
 #include <sstream>      // istringstream
 
-#include <data/types/varint.h>
-#include <io/stream_parser.h>
+#include <brtools/data/types/varint.h>
+#include <brtools/io/stream_parser.h>
 
 using namespace ::testing;
 using namespace brtools::data::types;
