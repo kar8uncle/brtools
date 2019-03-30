@@ -38,8 +38,8 @@ target_compile_features(brtools-tests PRIVATE
 )
 
 target_include_directories(brtools-tests
-    PUBLIC "${GTEST_SOURCE_DIR}/googletest/include"
-    PUBLIC "${GTEST_SOURCE_DIR}/googlemock/include"
+    SYSTEM PUBLIC "${GTEST_SOURCE_DIR}/googletest/include"
+    SYSTEM PUBLIC "${GTEST_SOURCE_DIR}/googlemock/include"
     PRIVATE "${PROJECT_SOURCE_DIR}/source"
     PRIVATE "${PROJECT_SOURCE_DIR}/include"
     PRIVATE "."
