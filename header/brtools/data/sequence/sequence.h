@@ -8,6 +8,7 @@
 #include <list>
 #include <unordered_map>
 #include <brtools/util/unit_testable.h>
+#include <brtools/data/playable.h>
 
 namespace brtools
 {
@@ -23,9 +24,8 @@ namespace sequence
      *
      * TODO: make sequence satisfy Container requirement, to support editing.
      */
-    class sequence
+    class sequence : public playable
     {
-        BRTOOLS_UNIT_TESTABLE
     public:
         using event_container = std::list<std::unique_ptr<event>>;
         using event_const_iterator = event_container::const_iterator;

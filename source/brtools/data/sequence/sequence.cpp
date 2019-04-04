@@ -148,15 +148,15 @@ sequence sequence::make_sequence(istream& stm)
         parser rseq(sp);
 
         // maps offset to event iterator;
-        // this is only useful at the time of parsing, because when we
-        // support editing, the offsets change all the time and thus
+        // offsets are only useful at the time of parsing, because when
+        // we support editing, the offsets change all the time and thus
         // not really reliable to be used to map to events.
         unordered_map<streamoff, event_const_iterator> offset_2_iter;
 
         ContainerProxy container{result._m_events, {}};
 
         // DATA section
-        for (const auto data = rseq.data(); data.has_data_to_read();)
+        for (auto data = rseq.data(); data.has_data_to_read() && sp.peek<uint8_t>() != 0x00;)
         {
             // remembers the offset of the current event
             const auto offset = sp.tell_offset_from_base();
@@ -187,7 +187,7 @@ sequence sequence::make_sequence(istream& stm)
 
         // LABL section
         {
-            const auto labl = rseq.labl();
+            auto labl = rseq.labl();
             for (const auto& offset_string_pair : labl.labels())
             {
                 const auto offset_iter_pair = offset_2_iter.find(offset_string_pair.first);

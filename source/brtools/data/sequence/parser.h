@@ -5,8 +5,12 @@
 #include <memory>       // std::unique_ptr
 #include <iosfwd>       // std::streamoff
 #include <utility>      // std::pair
+#include <cstdint>      // uint32_t
 #include <vector>
 #include <string>
+
+#include <brtools/data/types/sized_ref.h>
+
 #include <brtools/io/section_parser.h>
 #include <brtools/io/file_parser.h>
 
@@ -34,17 +38,12 @@ namespace sequence
         {
             labl_section_parser(io::stream_parser&, uint32_t expected_section_length);
 
-            const std::vector<std::pair<std::streamoff, std::string>>& labels() const;
-
-        private:
-            std::vector<std::pair<std::streamoff, std::string>> _m_labels;
+            std::vector<std::pair<std::streamoff, std::string>> labels();
         };
 
     private:
-        uint32_t offset_to_data;
-        uint32_t data_section_length;
-        uint32_t offset_to_labl;
-        uint32_t labl_section_length;
+        types::sized_ref _m_data_section_ref;
+        types::sized_ref _m_labl_section_ref;
 
     public:
         data_section_parser data();

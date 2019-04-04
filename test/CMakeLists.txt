@@ -27,6 +27,7 @@ add_executable(brtools-tests
     tests/varint_test.cpp
     tests/uint_test.cpp
     tests/random_test.cpp
+    tests/sized_ref_test.cpp
     tests/variable_test.cpp
     tests/sequence_test.cpp
 )

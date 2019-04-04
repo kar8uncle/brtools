@@ -11,22 +11,22 @@ parser::parser(stream_parser& sp)
 : file_parser(sp)
 {
     integrity_expect("file magic", "RSEQ", file_magic());
-    integrity_expect("file size", 0x20, file_header_size());
+    integrity_expect("header size", 0x20, file_header_size());
     integrity_expect("section count", 2, sp.read<uint16_t>());
-    sp >> offset_to_data >> data_section_length
-       >> offset_to_labl >> labl_section_length;
+    sp >> _m_data_section_ref
+       >> _m_labl_section_ref;
 }
 
 parser::data_section_parser parser::data()
 {
-    _m_sp.seek_by_offset_from_base(offset_to_data);
-    return data_section_parser(_m_sp, data_section_length);
+    _m_sp.seek_by_offset_from_base(_m_data_section_ref.offset());
+    return data_section_parser(_m_sp, _m_data_section_ref.length());
 }
 
 parser::labl_section_parser parser::labl()
 {
-    _m_sp.seek_by_offset_from_base(offset_to_labl);
-    return labl_section_parser(_m_sp, labl_section_length);
+    _m_sp.seek_by_offset_from_base(_m_labl_section_ref.offset());
+    return labl_section_parser(_m_sp, _m_labl_section_ref.length());
 }
 
 parser::data_section_parser::data_section_parser(stream_parser& sp, const uint32_t expected_section_length)
@@ -45,27 +45,22 @@ parser::labl_section_parser::labl_section_parser(stream_parser& sp, const uint32
 {
     integrity_expect("section magic", "LABL", section_magic());
     integrity_expect("section length", expected_section_length, section_length());
-
-    const auto label_count = sp.read<uint32_t>();
-    vector<streamoff> offsets_to_strings;
-
-    for (size_t count = 1; count <= label_count; ++count)
-    {
-        offsets_to_strings.push_back(sp.read<uint32_t>());    
-    }
-
-    for (auto offset_to_string : offsets_to_strings)
-    {
-        _m_sp.seek_by_offset_from_base(offset_to_string);
-
-        _m_labels.emplace_back(streamoff(sp.read<uint32_t>()), string(sp.read<uint32_t>(), '\0'));
-        generate(_m_labels.back().second.begin(),
-                 _m_labels.back().second.end(),
-                 bind(&stream_parser::read<char>, &sp));
-    }
 }
 
-const vector<pair<streamoff, string>>& parser::labl_section_parser::labels() const
+vector<pair<streamoff, string>> parser::labl_section_parser::labels()
 {
-    return _m_labels;
+    stream_parser::read_scope scope(_m_sp);
+    vector<pair<streamoff, string>> result(_m_sp.read<uint32_t>());
+
+    for (auto& pair : result)
+    {
+        stream_parser::read_scope scope(_m_sp, streamoff(_m_sp.read<uint32_t>()));
+
+        pair.first = _m_sp.read<uint32_t>();
+        for (size_t length = _m_sp.read<uint32_t>(); length > 0; --length)
+        {
+            pair.second.push_back(_m_sp.read<char>());
+        }
+    }
+    return result;
 }

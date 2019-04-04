@@ -18,6 +18,7 @@ add_library(brtools STATIC
     source/brtools/data/sequence/sequence.cpp
     source/brtools/data/types/random.cpp
     source/brtools/data/types/variable.cpp
+    source/brtools/data/types/sized_ref.cpp
 
     source/brtools/error/errors.cpp
     source/brtools/error/integrity_error.cpp
