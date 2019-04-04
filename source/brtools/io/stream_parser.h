@@ -45,13 +45,15 @@ namespace io
          */
         std::unique_ptr<const char[]> read(size_t number_of_bytes = 1);
 
+        /**
+         * Reads a value of type Tp from the parser, but doesn't change the reading
+         * position of the stream.
+         */
         template<typename Tp>
         Tp peek() const
         {
-            const auto pos = tell();
-            const auto v = const_cast<stream_parser*>(this)->read<Tp>();
-            const_cast<stream_parser*>(this)->seek(pos);
-            return v;
+            const read_scope scope(const_cast<stream_parser&>(*this));
+            return const_cast<stream_parser*>(this)->read<Tp>();
         }
 
         /**
@@ -67,6 +69,32 @@ namespace io
         }
 
     public: // position related
+        /**
+         * RAII-style object to seek to the position pointed to when this read_scope
+         * is created, on destruction.
+         */
+        struct read_scope
+        {
+            read_scope(stream_parser&);
+
+            /**
+             * @param seek_afterwards After the current position is recorded,
+             *                        seek to the specified position.
+             */
+            read_scope(stream_parser&, std::streampos);
+
+            /**
+             * @param seek_afterwards After the current position is recorded,
+             *                        seek to current offset base + specified offset.
+             */
+            read_scope(stream_parser&, std::streamoff seek_afterwards);
+            ~read_scope();
+
+        private:
+            stream_parser& _m_parser;
+            std::streampos _m_original_pos;
+        };
+
         /**
          * Retrieves the current stream position being read.
          */

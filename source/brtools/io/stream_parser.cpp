@@ -40,6 +40,26 @@ unique_ptr<const char[]> stream_parser::read(const size_t number_of_bytes)
     return ret;
 }
 
+stream_parser::read_scope::read_scope(stream_parser& sp)
+: read_scope(sp, sp.tell())
+{}
+
+stream_parser::read_scope::read_scope(stream_parser& sp, const streampos seek_afterwards)
+: _m_parser(sp)
+, _m_original_pos(sp.tell())
+{
+    _m_parser.seek(seek_afterwards);
+}
+
+stream_parser::read_scope::read_scope(stream_parser& sp, const streamoff seek_afterwards)
+: read_scope(sp, sp._m_offset_bases.top() + seek_afterwards)
+{}
+
+stream_parser::read_scope::~read_scope()
+{
+    _m_parser.seek(_m_original_pos);
+}
+
 streampos stream_parser::tell() const
 {
     return _m_stream_in.tellg();

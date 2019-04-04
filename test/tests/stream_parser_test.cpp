@@ -240,6 +240,103 @@ TEST_F(stream_parser_fixture, read_with_seeks)
 }
 
 /**
+ * Tests that reading position right before and right after a read scope
+ * doesn't change.
+ */
+TEST_F(stream_parser_fixture, read_scoping)
+{
+    const auto STM_CONTENT = "0123456789"s;
+    istringstream stm(STM_CONTENT);
+    stream_parser sp = parser(stm);
+    
+    sp.seek(streampos(0x0));
+
+    {   // Test 0: no read in scope
+        ASSERT_EQ(streampos(0x0), sp.tell());
+        {
+            stream_parser::read_scope scope(sp);
+        }
+        EXPECT_EQ(streampos(0x0), sp.tell());
+    }
+    
+    sp.seek(streampos(0x0));
+
+    {   // Test 1: one 1-byte read in scope
+        ASSERT_EQ(streampos(0x0), sp.tell());
+        {
+            stream_parser::read_scope scope(sp);
+            EXPECT_EQ('0', sp.read<uint8_t>());
+        }
+        EXPECT_EQ(streampos(0x0), sp.tell());
+    }
+
+    sp.seek(streampos(0x4));
+
+    {   // Test 2: two 1-byte reads in scope, scoped at reading position 0
+        ASSERT_EQ(streampos(0x4), sp.tell());
+        {
+            stream_parser::read_scope scope(sp, streampos(0x0));
+            EXPECT_EQ('0', sp.read<uint8_t>());
+            EXPECT_EQ('1', sp.read<uint8_t>());
+            EXPECT_EQ('2', sp.read<uint8_t>());
+            EXPECT_EQ('3', sp.read<uint8_t>());
+        }
+        EXPECT_EQ(streampos(0x4), sp.tell());
+    }
+
+    sp.seek(streampos(0x0));
+
+    {   // Test 3: two 4-byte reads in scope, scoped at reading position 2
+        ASSERT_EQ(streampos(0x0), sp.tell());
+        {
+            // offset base at position 0x1
+            const auto offset_scope = sp.push_offset_base(streampos(0x1));
+            // read scope scoped at offset base + 0x1 = position 0x2
+            stream_parser::read_scope scope(sp, streamoff(0x1));
+            // should read "2345" and "6789", as uint32_t
+            EXPECT_EQ(0x32'33'34'35, sp.read<uint32_t>());
+            EXPECT_EQ(0x36'37'38'39, sp.read<uint32_t>());
+        }
+        EXPECT_EQ(streampos(0x0), sp.tell());
+    }
+}
+
+/**
+ * Tests that peek doesn't change the stream position.
+ */
+TEST_F(stream_parser_fixture, peek)
+{
+    const auto STM_CONTENT = "01\xBE\xEF"s;
+    istringstream stm(STM_CONTENT);
+    stream_parser sp = parser(stm);
+
+    {   // Test 1: peek at beginning
+        const auto curr = sp.tell();
+        EXPECT_EQ('0', sp.peek<char>());
+        EXPECT_EQ(curr, sp.tell());
+        EXPECT_EQ('0', sp.read<char>());
+    }
+
+    sp.seek(streampos(0x1));
+
+    {   // Test 2: peek at position 1
+        const auto curr = sp.tell();
+        EXPECT_EQ('1', sp.peek<char>());    
+        EXPECT_EQ(curr, sp.tell());
+        EXPECT_EQ('1', sp.read<char>());
+    }
+
+    sp.seek(streampos(0x2));
+
+    {   // Test 3: 2-byte peek at position 2
+        const auto curr = sp.tell();
+        EXPECT_EQ(0xBEEF, sp.peek<uint16_t>());    
+        EXPECT_EQ(curr, sp.tell());
+        EXPECT_EQ(0xBEEF, sp.read<uint16_t>());
+    }
+}
+
+/**
  * Tests the offset scoping related methods.
  */
 TEST_F(stream_parser_fixture, offset_scoping)
