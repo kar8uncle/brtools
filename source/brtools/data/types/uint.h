@@ -2,6 +2,7 @@
 #define BRTOOLS_DATA_TYPES_UINT_H
 #pragma once
 
+#include <cstring>      // std::memcpy
 #include <cstdint>
 #include <iterator>     // std::rbegin, std::rend
 #include <climits>      // CHAR_BIT

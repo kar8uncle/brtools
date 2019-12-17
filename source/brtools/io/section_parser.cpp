@@ -2,6 +2,7 @@
 #include <brtools/util/integrity_expect.h>
 #include <cstdint>      // for uint32_t
 #include <algorithm>    // for generate
+#include <functional>   // for bind
 
 using brtools::util::integrity_expect;
 using namespace brtools::io;

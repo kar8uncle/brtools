@@ -1,6 +1,7 @@
 #include "file_parser.h"
 #include <cinttypes>    // for uint32_t
 #include <algorithm>    // for generate
+#include <functional>   // for bind
 
 using namespace brtools::io;
 using namespace std;

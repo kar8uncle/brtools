@@ -90,14 +90,20 @@ namespace sequence
         std::unique_ptr<event> resolve(const resolver& r) const override
         {
             struct resolved_open_track : open_track
-            , std::tuple<size_t, sequence::event_const_iterator>
             {
-                using std::tuple<size_t, sequence::event_const_iterator>::tuple;
+                resolved_open_track(size_t track_no, sequence::event_const_iterator&& track_data)
+                : _m_track_no(track_no)
+                , _m_track_data(std::move(track_data))
+                {}
+
                 size_t track_no() const override
-                {   return std::get<0>(*this); }
+                {   return _m_track_no; }
 
                 sequence::event_const_iterator track_data() const override
-                {   return std::get<1>(*this); }
+                {   return _m_track_data; }
+
+                size_t _m_track_no;
+                sequence::event_const_iterator _m_track_data;
             };
             return std::make_unique<resolved_open_track>(track_no(), r(std::get<1>(this->_m_arguments)));
         }
@@ -117,11 +123,15 @@ namespace sequence
         std::unique_ptr<event> resolve(const resolver& r) const override
         {
             struct resolved_jump : jump
-            , std::tuple<sequence::event_const_iterator>
             {
-                using std::tuple<sequence::event_const_iterator>::tuple;
+                resolved_jump(sequence::event_const_iterator&& dst)
+                : _m_destination(std::move(dst))
+                {}
+
                 sequence::event_const_iterator destination() const override
-                {   return std::get<0>(*this); }
+                {   return _m_destination; }
+
+                sequence::event_const_iterator _m_destination;
             };
             return std::make_unique<resolved_jump>(r(std::get<0>(this->_m_arguments)));
         }
@@ -141,11 +151,15 @@ namespace sequence
         std::unique_ptr<event> resolve(const resolver& r) const override
         {
             struct resolved_call : call
-            , std::tuple<sequence::event_const_iterator>
             {
-                using std::tuple<sequence::event_const_iterator>::tuple;
+                resolved_call(sequence::event_const_iterator&& dst)
+                : _m_destination(std::move(dst))
+                {}
+
                 sequence::event_const_iterator destination() const override
-                {   return std::get<0>(*this); }
+                {   return _m_destination; }
+
+                sequence::event_const_iterator _m_destination;
             };
 
             return std::make_unique<resolved_call>(r(std::get<0>(this->_m_arguments)));

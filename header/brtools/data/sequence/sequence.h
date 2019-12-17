@@ -16,8 +16,8 @@ namespace data
 {
 namespace sequence
 {
-    class visitor;
-    class event;
+    struct visitor;
+    struct event;
 
     /**
      * Represents sequenced music containing events.

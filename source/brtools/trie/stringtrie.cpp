@@ -135,7 +135,7 @@ namespace
         result.char_index = 0;
         for (const auto& chars : string_zip(str1, str2))
         {
-            if (const diff_index_type::index_type diff = get<0>(chars) xor get<1>(chars))
+            if (const diff_index_type::index_type diff = get<0>(chars) ^ get<1>(chars))
             {
                 result.bit_index = count_leading_zeros(diff);
                 return result;

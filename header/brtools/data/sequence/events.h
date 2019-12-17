@@ -16,7 +16,10 @@ namespace sequence
     /**
      * Represents a generic sequence event.
      */
-    struct event : virtual visitor_acceptable {};
+    struct event : virtual visitor_acceptable
+    {
+        virtual ~event() = default;
+    };
 
     // 0x00 through 0x7F
     struct note_on : event, visitable<note_on>
@@ -418,4 +421,3 @@ namespace sequence
 }
 }
 #endif
-

@@ -17,8 +17,10 @@ namespace sequence
      */
     struct visitor_acceptable
     {
-        virtual ~visitor_acceptable() = default;
         virtual void accept(visitor&, const visitor::operation&) const = 0;
+
+    protected:
+        ~visitor_acceptable() = default;
     };
 }
 }

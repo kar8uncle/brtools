@@ -20,6 +20,9 @@ namespace sequence
     {
         void accept(visitor& visitor, const visitor::operation& op) const override
         {   visitor.visit(static_cast<const VisitableType&>(*this), op);  }
+
+    protected:
+        ~visitable() = default;
     };
 }
 }

@@ -18,6 +18,9 @@ namespace sequence
     {
         using resolver = std::function<sequence::event_const_iterator(std::streamoff)>;
         virtual std::unique_ptr<event> resolve(const resolver&) const = 0;
+
+    protected:
+        ~resolvable() = default;
     };
 }
 }
